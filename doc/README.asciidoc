@@ -1,0 +1,65 @@
+SocialLangoliers
+==================
+//This is an asciidoc document.
+// asciidoc -a icons -a data-uri -a toc README.asciidoc
+
+**The Social Media Clean up tool.**
+
+Langoliers? Huh?
+----------------
+
+
+I used to read a lot of books by http://en.wikipedia.org/wiki/Stephen_King[Stephen King] when I was younger.
+http://en.wikipedia.org/wiki/The_Langoliers[Langoliers] is a title of a book written by Stephen King that later became a movie.
+
+[quote]
+The Langoliers "are the timekeepers of eternity, that their purpose is to clean up what is left of the past" (Wikipedia).
+
+
+It seems appropriate for a software projects that eats away at the trail/crud left behind by you social activities.
+
+Status
+------
+
+Currently supported social media services:  
+
+- Twitter
+- Facebook (In Progress)
+
+Future plans in order of priority (based on creepiness factor):  
+
+. FourSquare 
+. Instagram 
+. LinkedIn 
+. Amazon (reviews and such )
+. Others? ( Requests? Open up an https://github.com/SocialLangoliers/SocialLangoliers/issues[Github Issue]
+) 
+
+ChangeLog
+~~~~~~~~~
+http://sociallangoliers.github.com/SocialLangoliers/ChangeLog.html[ChangeLog]
+
+Privacy
+-------
+
+This application WILL request just about every permission under the sun to all of your social media accounts.  It should not be persisting any data or tokens past the one time run.  Though I would advise you to revoke the rights to this application once your cleanup is done.  
+
+I'm not sure if this will ever transition over to a web app / service of some form, but for the time being, the way it's structured there should be no need for it to retrain any permissions.
+
+What Does It Do?
+----------------
+
+Currently, you need to authorize this application to access your social media account and it will search through your entire history and remove any posts that are older then N number of days old.
+
+Naturally deleting the account will accomplish this more quickly.  This tool presume you'll keep on using social media and just cleans off a bit of your social online 'fingerprint' that doesn't need to be there.
+
+Motivation
+----------
+
+I'm a bit paranoid about personal information, and some content really doesn't serve any purpose beyond a certain shelf life.  Tweets especially are utterly useless past a certain point.  There has been so much talk about personal privacy yet little has really been done about it.  This program which probably should exist as a webservice (at some point), will basically eat away on your social prescence after a certain point.  
+
+Far too much about your identify, political leanings, beliefs can be determined based on what you leave behind.  Data mining the information, combined with your geolocation and very simple census data can be used to derive all sorts of things about you.
+
+Most people use social media to interact with friends, coworkers and such.  This tries to remove the trail of data you leave behind while still allowing you to do just that.
+
+

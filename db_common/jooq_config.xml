@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <!-- Configure the database connection here -->
+    <jdbc>
+        <driver>org.postgresql.Driver</driver>
+        <url>jdbc:postgresql://localhost:5432/social</url>
+        <user>social</user>
+        <password>social</password>
+    </jdbc>
+
+    <generator>
+        <strategy>
+            <matchers>
+                <tables>
+                    <table>
+                        <!--when the schema and table are the same name, a mismatch with the identity variables for the
+                        report bundler table occurs, causing the generation to fail. This resolves that-->
+                        <expression>report_bundle.report_bundle</expression>
+                        <tableIdentifier>
+                            <expression>REPORT_BUNDLE_TABLE</expression>
+                        </tableIdentifier>
+                    </table>
+                    <table>
+                        <!--when the schema and table are the same name, a mismatch with the identity variables for the
+                        tag table occurs, causing the generation to fail. This resolves that-->
+                        <expression>tag.tag</expression>
+                        <tableIdentifier>
+                            <expression>TAG_TABLE</expression>
+                        </tableIdentifier>
+                    </table>
+                </tables>
+            </matchers>
+        </strategy>
+        <database>
+            <name>org.jooq.meta.postgres.PostgresDatabase</name>
+            <includes>
+                config.user
+                | config.social_app
+                | config.social_app_type
+                | config.user_social
+
+                | DUMMY.everything_below_is_a_stored_procedure
+
+                | pg_catalog.array_agg
+                | pg_catalog.regexp_replace
+                | pg_catalog.row_number
+                | pg_catalog.txid_current
+
+
+            </includes>
+            <excludes/>
+
+
+            <schemata>
+                <schema>
+                    <inputSchema>config</inputSchema>
+                </schema>
+                <schema>
+                    <inputSchema>pg_catalog</inputSchema>
+                </schema>
+            </schemata>
+            <forcedTypes>
+                <forcedType>
+                  <userType>com.fasterxml.jackson.databind.JsonNode</userType>
+                  <binding>com.sociallangoliers.db_common.bindings.PostgresJsonbBinding</binding>
+                  <!-- Below is a Java regular expression matching column names to be forced to have this binding type.  -->
+                  <expression>
+                        config\.user_social\.meta_data
+                  </expression>
+                  <!-- Below is a Java regular expression matching data types to be forced to have this type.  -->
+                  <types>jsonb</types>
+                </forcedType>
+<!--                <forcedType>-->
+<!--                    <userType>com.fasterxml.jackson.databind.JsonNode</userType>-->
+<!--                    <binding>com.sociallangoliers.db_common.bindings.PostgresJsonBinding</binding>-->
+<!--                    &lt;!&ndash; Below is a Java regular expression matching column names to be forced to have this binding type.  &ndash;&gt;-->
+<!--                    <expression>-->
+<!--                        integration\.service_process\.result2-->
+<!--                    </expression>-->
+<!--                    &lt;!&ndash; Below is a Java regular expression matching data types to be forced to have this type.  &ndash;&gt;-->
+<!--                    <types>json</types>-->
+<!--                </forcedType>-->
+            </forcedTypes>
+        </database>
+
+        <generate>
+            <pojos>true</pojos>
+            <pojosEqualsAndHashCode>true</pojosEqualsAndHashCode>
+            <interfaces>true</interfaces>
+            <!-- Brings in JSR-308 adding compile time checks for @NotNull and @Size checks -->
+            <validationAnnotations>true</validationAnnotations>
+            <javaTimeTypes>true</javaTimeTypes>
+        </generate>
+        <name>org.jooq.codegen.JavaGenerator</name>
+
+        <target>
+            <packageName>com.sociallangoliers.db_common.models</packageName>
+            <directory>target/generated-sources/jooq</directory>
+        </target>
+    </generator>
+</configuration>

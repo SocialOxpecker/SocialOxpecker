@@ -1,2 +1,10 @@
 *.iml
 target/
+README.html
+ChangeLog.html
+.idea
+pom.xml.versionsBackup
+zk-single-kafka-single
+target
+sql
+sql/V999__private.sql

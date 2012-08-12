@@ -1,0 +1,27 @@
+debug: true
+
+global_app:
+  delta: 17
+
+global:
+  apps: twitter,reddit
+
+logging:
+  pattern:
+    console: '%msg%n'
+    file: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%'
+  level:
+    org:
+      springframework: ERROR
+    root: INFO
+
+spring:
+  flyway:
+    locations: classpath:db/migration
+  datasource:
+    url: jdbc:postgresql://localhost:5432/social
+    username: social
+    password: social
+  data:
+    rest:
+      basePath: /api

@@ -1,0 +1,22 @@
+//This is an asciidoc document.
+// asciidoc -a icons -a data-uri -a toc  ChangeLog.asciidoc
+Version History
+===============
+
+0.0.2-Alpha
+-----------
+ * Minor improvement to configuration.
+ * Added support for clean up of favorites, retweets, statuses, direct messages
+
+NOTE:  retweets should be covered by status cleanup, this should mainly server as a fail-safe.
+[WARNING]
+This fails to build with JDK7.  I think it's an know issue with twitter4j.  I'll fix this once they release an update.
+
+
+0.0.1-Alpha
+-----------
+
+ * Added support for twitter cleanup.
+ * This app will ask for permission and flush out your entire twitter stream
+ from your first post onwards.
+
