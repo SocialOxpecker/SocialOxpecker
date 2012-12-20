@@ -2,7 +2,8 @@ package org.techieworld;
 
 
 import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import twitter4j.Paging;
 import twitter4j.Status;
 import twitter4j.Twitter;
@@ -22,12 +23,13 @@ import java.util.Scanner;
  * Time: 8:22 PM
  */
 public class Main {
-	static Logger logger = Logger.getLogger(Main.class);
+    static Logger logger = LoggerFactory.getLogger(Main.class);
 	private static final long twoWeeks = 14 * 24*60*60 * 1000;
 	static Twitter twitter = new TwitterFactory().getInstance();
 
 	static {
 		twitter.setOAuthConsumer("x17j0JX3OpeH32bjYXB3w", "QfOoFSIZHCy2k7156frRMk8ZITwxImQE0qDXslL5zI");
+        BasicConfigurator.configure();
 	}
 
 	public static AccessToken requestToken()
@@ -77,13 +79,22 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
-		logger.info("Hello");
-		//AccessToken token = new AccessToken("token", "secret");
+        logger.info("WARNING!!!!!!  Once authorized, this will delete EVERY tweet you ever posted, that is older then 2 weeks.\n" +
+        "Do not continue unless you are absolutely certain you want to do this.");
+        Scanner scanner = new Scanner(System.in);
+        logger.info("Do you wish to continue? (y/n)?");
+        String ans = scanner.nextLine();
+
+        if(ans.toLowerCase().charAt(0) != 'y' ) {
+            logger.info("Exciting application....");
+            System.exit(0);
+        }
+
 		AccessToken token = requestToken();
 		twitter.setOAuthAccessToken(token);
 
 		Date earlier = new Date(System.currentTimeMillis() - twoWeeks);
-		logger.info(earlier);
+		logger.info(earlier.toString());
 
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
@@ -93,7 +104,7 @@ public class Main {
 			boolean found = true;
 			int start = 1;
 			int increment = 199;
-			while(found == true)
+			while(found)
 			{
 				found = false;
 				List<Status> status =  twitter.getUserTimeline(new Paging(start,start+increment));
@@ -107,13 +118,11 @@ public class Main {
 						twitter.destroyStatus(s.getId());
 					}
 				}
-				logger.info(status.size());
+				logger.debug("size of status is: {} ", status.size());
 			}
 		} catch (TwitterException e) {
-			logger.error(e);
+			logger.error("Twitter exception occurred", e);
 		}
-
-
 	}
 
 }

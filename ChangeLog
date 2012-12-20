@@ -1,0 +1,11 @@
+Version History
+===============
+
+
+0.0.1-Alpha
+~~~~~
+
+ * Added support for twitter cleanup.
+ * This app will ask for permission and flush out your entire twitter stream
+ from your first post onwards.
+
