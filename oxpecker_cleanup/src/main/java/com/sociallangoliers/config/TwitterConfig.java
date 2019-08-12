@@ -37,8 +37,9 @@ public class TwitterConfig {
 	boolean friendships;
 
     @Autowired
-	public TwitterConfig(@Value("${twitter.consumer}") final String consumer,
-						 @Value("${twitter.secret}") final String secret,
+	public TwitterConfig(
+		@Value("${twitter.consumer:default}") final String consumer,
+						 @Value("${twitter.secret:secret}") final String secret,
 						 @Value("${twitter.incrementCount:199}") final int incrementCount) {
 
 		this.token = new RequestToken(consumer, secret);

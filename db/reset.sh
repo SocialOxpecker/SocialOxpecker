@@ -1,4 +1,5 @@
 #!/usr/bin/env bash 
+cd ..
 docker-compose stop db; 
 docker-compose rm -f; 
 for i in $(docker volume ls  | awk '{print $2}'  | grep -v "VOLUME"); 
