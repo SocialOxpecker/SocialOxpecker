@@ -32,6 +32,21 @@ public class SocialAppRepositoryImpl implements SocialAppRepository {
 
     }
 
+    @Override
+    public SocialApp getSocialAppByName(String name) {
+        return
+            dslContext.selectFrom(CONFIG.SOCIAL_APP)
+                .where(CONFIG.SOCIAL_APP.SOCIAL_APP_TYPE.eq(name))
+                .fetchOneInto(SocialApp.class);
+    }
+
+    public SocialApp getSocialAppById(long id) {
+        return
+            dslContext.selectFrom(CONFIG.SOCIAL_APP)
+                .where(CONFIG.SOCIAL_APP.APP_ID.eq(id))
+                .fetchOneInto(SocialApp.class);
+    }
+
 
 
 }

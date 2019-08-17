@@ -4,12 +4,14 @@ package com.sociallangoliers.services.impl;
 import com.sociallangoliers.config.Configuration;
 import com.sociallangoliers.config.TwitterConfig;
 import com.sociallangoliers.services.PruneSocial;
+import com.sociallangoliers.support.SocialAction;
 import lombok.extern.log4j.Log4j2;
 import org.scribe.model.Token;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import scala.Tuple2;
 import twitter4j.DirectMessage;
 import twitter4j.IDs;
 import twitter4j.Paging;
@@ -21,6 +23,7 @@ import twitter4j.UserList;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
@@ -29,7 +32,10 @@ import java.util.Scanner;
 @Qualifier("twitter")
 @Log4j2
 public class Twitter implements PruneSocial {
-    Token accessToken= null;
+
+    private static final int PAGE_SIZE = 199;
+
+    Token accessToken = null;
     private final twitter4j.Twitter twitter;
     private final Date earlier;
     Configuration config = null;
@@ -40,12 +46,11 @@ public class Twitter implements PruneSocial {
     public Twitter(TwitterConfig twitterConfig,
                    @Value("${global_app.delta:17}") int delta) {
         twitter = new TwitterFactory().getInstance();
-        token = twitterConfig.getToken();
-        twitter.setOAuthConsumer(twitterConfig.getToken().getToken(), twitterConfig.getToken().getTokenSecret());
+//        token = twitterConfig.getToken();
+//        twitter.setOAuthConsumer(twitterConfig.getToken().getToken(), twitterConfig.getToken().getTokenSecret());
         earlier = new Date(System.currentTimeMillis() - delta);
         this.twitterConfig = twitterConfig;
     }
-
 
     /**
      * In theory this could persis the token.  For now, due to the excessively intrusive nature
@@ -60,6 +65,33 @@ public class Twitter implements PruneSocial {
         log.info("id: " + id);
         log.info("token:" + accessToken.getToken());
         log.info("secret" + ":" + accessToken.getTokenSecret());
+    }
+
+    @Override
+    public String authenticate(RequestToken appToken) {
+        try {
+
+            twitter4j.Twitter twitter = new TwitterFactory().getInstance();
+            twitter.setOAuthConsumer(appToken.getToken(), appToken.getTokenSecret());
+            RequestToken requestToken = twitter.getOAuthRequestToken();
+            return requestToken.getAuthorizationURL();
+        } catch (TwitterException e) {
+            log.error("Failed to authenticate user: ", e);
+            return null;
+        }
+
+    }
+
+    @Override
+    public Tuple2<String, String> validate(RequestToken appToken, String pin) {
+        twitter4j.Twitter twitter = new TwitterFactory().getInstance();
+        twitter.setOAuthConsumer(appToken.getToken(), appToken.getTokenSecret());
+        try {
+            AccessToken accessToken = twitter.getOAuthAccessToken(appToken, pin);
+            return new Tuple2<>(accessToken.getToken(), accessToken.getTokenSecret());
+        } catch (TwitterException e) {
+            throw new RuntimeException("Cannot validate user.");
+        }
     }
 
 
@@ -102,7 +134,7 @@ public class Twitter implements PruneSocial {
     }
 
     public Token getAccessToken() {
-        if(accessToken  != null) {
+        if (accessToken != null) {
             return accessToken;
         }
         AccessToken access = requestToken();
@@ -112,12 +144,17 @@ public class Twitter implements PruneSocial {
     }
 
 
+
+
+
     /**
      * Remove all user lists irrelevant of creation date since that information is
      * not exposed via twitter/ twitter4j.
      * Note: Not time aware.
+     *
+     * @param requestToken
      */
-    private void removeLists() {
+    private void removeLists(twitter4j.Twitter requestToken) {
         try {
             ResponseList<UserList> lists = twitter.getUserLists(twitter.getScreenName());
             for (UserList list : lists) {
@@ -132,8 +169,10 @@ public class Twitter implements PruneSocial {
     /**
      * Remove all user's friendships (ie. people you are following).
      * Note:  Not time aware.
+     *
+     * @param requestToken
      */
-    private void removeFriendships() {
+    private void removeFriendships(twitter4j.Twitter requestToken) {
         try {
             long cursor = -1;
             IDs ids;
@@ -156,7 +195,7 @@ public class Twitter implements PruneSocial {
         try {
             boolean found = true;
             int start = 1;
-            int increment = twitterConfig.getIncrementCount();
+            int increment = PAGE_SIZE;
             while (found) {
                 found = false;
                 ResponseList<Status> responses = twitter.getRetweetsOfMe(new Paging(start, start + increment));
@@ -176,11 +215,11 @@ public class Twitter implements PruneSocial {
     /**
      * Remove any favorited tweets that occured prior to delta given.
      */
-    private void removeFavorites() {
+    private void removeFavorites(twitter4j.Twitter twitter) {
         try {
             boolean found = true;
             int start = 1;
-            int increment = twitterConfig.getIncrementCount();
+            int increment = PAGE_SIZE;
             while (found) {
                 found = false;
                 ResponseList<Status> responses = twitter.getFavorites(new Paging(start, start + increment));
@@ -200,15 +239,17 @@ public class Twitter implements PruneSocial {
     /**
      * remove any direct messages (dm in twitter slang) that were sent and received by the
      * user prior to a certain date)
+     *
      */
-    public void deleteDirectMessages() {
+    public void deleteDirectMessages(twitter4j.Twitter twitter, LocalDateTime earlier2) {
         try {
             boolean found = true;
             int start = 1;
-            int increment = twitterConfig.getIncrementCount();
+            int increment = PAGE_SIZE;
             //Removing messages sent to user
             while (found) {
                 found = false;
+                //TODO: migrate to: DirectMessageList getDirectMessages(int count, String cursor)
                 ResponseList<DirectMessage> responses = twitter.getDirectMessages(new Paging(start, start + increment));
                 for (DirectMessage dm : responses) {
                     if (earlier.getTime() > dm.getCreatedAt().getTime()) {
@@ -220,7 +261,7 @@ public class Twitter implements PruneSocial {
             }
             found = true;
             start = 1;
-            increment = twitterConfig.getIncrementCount();
+            increment = PAGE_SIZE;
             //Removing messages sent by user.
             while (found) {
                 found = false;
@@ -271,12 +312,14 @@ public class Twitter implements PruneSocial {
     /**
      * Delete normal tweets sent by the users that match the delta requirements.
      * (ie. delete tweets older then 2 weeks. Default )
+     *
+     * @param requestToken
      */
-    public void deleteTweets() {
+    public void deleteTweets(twitter4j.Twitter requestToken, LocalDateTime localDateTime) {
         try {
             boolean found = true;
             int start = 1;
-            int increment = twitterConfig.getIncrementCount();
+            int increment = PAGE_SIZE;
             while (found) {
                 found = false;
                 List<Status> status = twitter.getUserTimeline(new Paging(start, start + increment));
@@ -314,27 +357,48 @@ public class Twitter implements PruneSocial {
         AccessToken token = requestToken();
         twitter.setOAuthAccessToken(token);
 
-        TwitterConfig config = twitterConfig;
-
-        if (config.isCleanDirectMessages()) {
-            deleteDirectMessages();
-        }
-        if (config.isCleanLists()) {
-            removeLists();
-        }
-        if (config.isCleanTweets()) {
-            deleteTweets();
-        }
-        if (config.isCleanFavorites()) {
-            removeFavorites();
-        }
-        if (config.isCleanReTweets()) {
-            removeRetweets();
-        }
-        if (config.isCleanFriendships()) {
-            removeFriendships();
-        }
 
         return true;
+    }
+
+    @Override
+    public boolean cleanup(SocialAction action, Object appToken, Object userAuthToken, LocalDateTime localDateTime) {
+        RequestToken requestToken = null;
+        AccessToken accessToken = null;
+
+        if (appToken instanceof RequestToken) {
+            requestToken = (RequestToken) appToken;
+        } else {
+            return false;
+        }
+
+        if (userAuthToken instanceof AccessToken) {
+            accessToken = (AccessToken) userAuthToken;
+        } else {
+            return false;
+        }
+        twitter4j.Twitter twitter = new TwitterFactory().getInstance();
+        twitter.setOAuthConsumer(requestToken.getToken(), requestToken.getTokenSecret());
+        twitter.setOAuthAccessToken(accessToken);
+
+        switch (action) {
+            case lists:
+                removeLists(twitter);
+                break;
+            case posts:
+                deleteTweets(twitter, localDateTime);
+                break;
+            case directmessages:
+                deleteDirectMessages(twitter, localDateTime);
+                break;
+            case favorites:
+                removeFavorites(twitter);
+                break;
+            case friendships:
+                removeFriendships(twitter);
+                break;
+        }
+
+        return false;
     }
 }

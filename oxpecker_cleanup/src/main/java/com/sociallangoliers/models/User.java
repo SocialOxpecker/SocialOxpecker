@@ -3,7 +3,6 @@ package com.sociallangoliers.models;
 import com.google.common.collect.Lists;
 import com.sociallangoliers.db_common.models.config.tables.interfaces.IUser;
 import com.sociallangoliers.db_common.models.config.tables.pojos.UserSocial;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,8 +11,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @Data
-//@NoArgsConstructor
-//@AllArgsConstructor
+@NoArgsConstructor
 public class User implements IUser {
     private Long userId;
     private String name;

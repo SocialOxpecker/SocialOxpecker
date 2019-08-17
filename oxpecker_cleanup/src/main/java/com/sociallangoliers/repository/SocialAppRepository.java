@@ -7,4 +7,8 @@ import java.util.List;
 public interface SocialAppRepository {
 
     List<SocialApp> getApplicationList();
+
+    SocialApp getSocialAppByName(String name);
+
+    SocialApp getSocialAppById(long id);
 }

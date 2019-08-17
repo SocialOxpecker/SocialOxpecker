@@ -29,6 +29,6 @@ public class SchedulerResource {
     @RequestMapping(value = "/runnow", method = RequestMethod.GET)
     public String runNow() {
         scheduler.runnow();
-        return "woot";
+        return "Manually Triggered";
     }
 }

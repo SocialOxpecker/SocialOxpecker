@@ -3,7 +3,7 @@
     <!-- Configure the database connection here -->
     <jdbc>
         <driver>org.postgresql.Driver</driver>
-        <url>jdbc:postgresql://localhost:5432/social</url>
+        <url>jdbc:postgresql://192.168.99.100:5432/social</url>
         <user>social</user>
         <password>social</password>
     </jdbc>

@@ -9,9 +9,11 @@ import com.restfb.types.User;
 import com.sociallangoliers.config.Configuration;
 import com.sociallangoliers.config.FacebookConfig;
 import com.sociallangoliers.services.PruneSocial;
+import com.sociallangoliers.support.SocialAction;
 import lombok.extern.log4j.Log4j2;
 import org.apache.log4j.BasicConfigurator;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import org.scribe.builder.*;
@@ -20,6 +22,8 @@ import org.scribe.model.*;
 import org.scribe.oauth.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import scala.Tuple2;
+import twitter4j.auth.RequestToken;
 
 /**
  * User: Samir Faci
@@ -92,6 +96,12 @@ public class Facebook implements PruneSocial {
     }
 
     @Override
+    public boolean cleanup(SocialAction action, Object appToken, Object userAuthToken, LocalDateTime localDateTime) {
+        return false;
+    }
+
+
+    @Override
     public Token getAccessToken() {
         FacebookConfig fbconfig = config.getFbConfig();
         String apiKey = fbconfig.getClientId();
@@ -126,5 +136,15 @@ public class Facebook implements PruneSocial {
         System.out.println();
         return accessToken;
 
+    }
+
+    @Override
+    public String authenticate(RequestToken appToken) {
+        return null;
+    }
+
+    @Override
+    public Tuple2<String, String> validate(RequestToken appToken, String pin) {
+        return null;
     }
 }

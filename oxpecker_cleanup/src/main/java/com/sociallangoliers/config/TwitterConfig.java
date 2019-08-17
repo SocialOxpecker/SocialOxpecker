@@ -2,7 +2,7 @@ package com.sociallangoliers.config;
 
 import java.util.*;
 
-import com.sociallangoliers.support.TwitterActions;
+import com.sociallangoliers.support.SocialAction;
 import lombok.Data;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -23,7 +23,7 @@ import twitter4j.auth.RequestToken;
 @Data
 public class TwitterConfig {
 
-    private Map<TwitterActions, Boolean> twitterActions = new HashMap<TwitterActions, Boolean>();
+    private Map<SocialAction, Boolean> twitterActions = new HashMap<SocialAction, Boolean>();
 
     private String consumer;
     private String secret;
@@ -72,18 +72,19 @@ public class TwitterConfig {
         if (prop.get("twitter.incrementCount") != null)
             incrementCount = NumberUtils.toInt((String) prop.get("twitter.incrementCount"), 199);
 
-        twitterActions.put(TwitterActions.DirectMessages, BooleanUtils.toBoolean((String) prop.get("twitter.DirectMessages")));
-        twitterActions.put(TwitterActions.Lists, BooleanUtils.toBoolean((String) prop.get("twitter.Lists")));
-        twitterActions.put(TwitterActions.Tweets, BooleanUtils.toBoolean((String) prop.get("twitter.Tweets")));
-        twitterActions.put(TwitterActions.Favorites, BooleanUtils.toBoolean((String) prop.get("twitter.Favorites")));
-        twitterActions.put(TwitterActions.Retweets, BooleanUtils.toBoolean((String) prop.get("twitter.Retweets")));
-        twitterActions.put(TwitterActions.Friendships, BooleanUtils.toBoolean((String) prop.get("twitter.Friendships")));
+        twitterActions.put(SocialAction.directmessages, BooleanUtils.toBoolean((String) prop.get("twitter.DirectMessages")));
+        twitterActions.put(SocialAction.lists, BooleanUtils.toBoolean((String) prop.get("twitter.lists")));
+        twitterActions.put(SocialAction.posts, BooleanUtils.toBoolean((String) prop.get("twitter.tweets")));
+        twitterActions.put(SocialAction.favorites, BooleanUtils.toBoolean((String) prop.get("twitter.favorites")));
+        twitterActions.put(SocialAction.reposts, BooleanUtils.toBoolean((String) prop.get("twitter.retweets")));
+        twitterActions.put(SocialAction.friendships, BooleanUtils.toBoolean((String) prop.get("twitter.friendships")));
 
     }
 
 	public boolean isCleanDirectMessages() {
 		return directMessages;
 	}
+
 
 	public boolean isCleanFavorites() {
 		return favorites;

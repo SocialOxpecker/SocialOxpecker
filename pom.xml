@@ -32,6 +32,7 @@
     <properties>
         <jooq-version>3.11.9</jooq-version>
         <postgresql-version>42.2.6</postgresql-version>
+        <akka-version>2.5.24</akka-version>
     </properties>
 
 </project>
